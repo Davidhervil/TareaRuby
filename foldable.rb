@@ -11,7 +11,7 @@ module Fold
         end
     end
     def length
-        self.foldr(0) { |ac| ac+1 }
+        self.foldr(0) { |e,ac| ac+1 }
     end
     def all? &block
         self.foldr(true) { |e,ac| ac && block.call(e)}
@@ -66,6 +66,10 @@ class Rose
         end
 
         b.call(self.elem, acum)
+    end
+    def avg
+        suma, total = self.foldr1 {|e,a| a= [a[0]+e, a[1]+1] }
+        Float(suma)/total
     end
 end
 
