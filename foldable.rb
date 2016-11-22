@@ -67,8 +67,12 @@ class Rose
 
         b.call(self.elem, acum)
     end
+
     def avg
-        suma, total = self.foldr1 {|e,a| a= [a[0]+e, a[1]+1] }
+        b=[0,1]
+        self.foldr1 {|e,a| b[1]+=1; b[0]= a+e}
+        suma = b[0]
+        total = b[1]
         Float(suma)/total
     end
 end
