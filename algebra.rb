@@ -3,7 +3,7 @@ require 'singleton'
 class Interval
 	attr_reader :izq, :der, iz_in:, de_in:
 	# Verificar si es mejor hacer las inclusiones con un numero
-	# y sumarselo siempre
+	# y sumarselo siempre CHECKED
 end
 
 class Literal < Interval
