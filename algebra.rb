@@ -48,7 +48,13 @@ class Literal < Interval
 		@izq_in = izq_in
 		@der_in = der_in
 	end
+
 	def intersection other
+	
+	end
+
+	def union other
+
 	end
 end
 
@@ -59,6 +65,14 @@ class RightInfinite < Interval
 		@der_in = false
 		@izq_in = izq_in
 	end
+
+	def intersection other
+	
+	end
+
+	def union other
+
+	end
 end
 
 class LeftInfinite < Interval
@@ -67,6 +81,14 @@ class LeftInfinite < Interval
 		@izq = -(Float::INFINITY)
 		@izq_in = false
 		@der_in = der_in
+	end
+
+	def intersection other
+	
+	end
+
+	def union other
+
 	end
 end
 
@@ -78,10 +100,26 @@ class AllReals < Interval
 		@izq_in = false
 		@der_in = false
 	end
+
+	def intersection other
+	
+	end
+
+	def union other
+
+	end
 end
 
 class Empty < Interval
 	include Singleton
 	def initialize
+	end
+
+	def intersection other
+	
+	end
+
+	def union other
+
 	end
 end
