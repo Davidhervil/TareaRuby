@@ -5,20 +5,11 @@ class Interval
 	# Verificar si es mejor hacer las inclusiones con un numero
 	# y sumarselo siempre CHECKED-RECHECKED
 	def initialize izq, der, izq_in=true, der_in=true
-		
+		@izq = izq
+		@der = der
+		@izq_in = izq_in
+		@der_in = der_in
 		#OJO ARREGLAR
-		if empt?(izq,der,izq_in,der_in)
-			puts "what"
-			Empty.instance
-		elsif izq == -(Float::INFINITY) && der == Float::INFINITY
-			AllReals.instance
-		elsif izq == -(Float::INFINITY)
-			LeftInfinite.new(der,der_in)
-		elsif der == Float::INFINITY
-			RightInfinite.new(izq,izq_in)
-		else
-			Literal.new(@izq,@der,@izq_in,@der_in)
-		end
 	end
 
 	def to_s
@@ -56,6 +47,8 @@ class Literal < Interval
 		@der = der
 		@izq_in = izq_in
 		@der_in = der_in
+	end
+	def intersection other
 	end
 end
 
