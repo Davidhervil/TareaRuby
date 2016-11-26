@@ -34,6 +34,47 @@ class Interval
 		self == Empty.instance
 	end
 
+	def intersect? other
+		if other == Empty.instance || self == Empty.instance
+			return false
+		else
+			#Vemos si other esta dentro
+			if self.izq < other.izq && other.izq < self.der
+				return true
+			elsif self.izq < other.izq && other.izq == self.der && (self.der_in==other.izq_in)==true
+				return true
+			elsif self.izq == other.izq && (self.izq_in==other.izq_in)==true
+				return true
+			elsif self.izq == other.izq && (self.izq_in==other.izq_in)==false && other.izq < self.der
+				return true
+			elsif self.izq == other.izq && (self.izq_in!=other.izq_in)
+				if self.der > self.izq && other.der > other.izq
+					return true
+				else
+					return false
+				end
+			end
+			#Vemos si self esta dentro
+			if other.izq < self.izq && self.izq < other.der
+				return true
+			elsif other.izq < self.izq && self.izq == other.der && (other.der_in==self.izq_in)==true
+				return true
+			elsif other.izq == self.izq && (other.izq_in==self.izq_in)==true
+				return true
+			elsif other.izq == self.izq && (other.izq_in==self.izq_in)==false && self.izq < other.der
+				return true
+			elsif other.izq == self.izq && (other.izq_in!=self.izq_in)
+				if other.der > other.izq && self.der > self.izq
+					return true
+				else
+					return false
+				end
+			else
+				return false
+			end
+		end
+	end
+
 	def empt? i, d, izn, den
 		i>d || ( i == d && ( ((false == izn )== den) || ( izn != den )))
 	end
@@ -80,45 +121,6 @@ class Literal < Interval
 
 	def union other
 
-	end
-
-	def intersect? other
-		#Vemos si other esta dentro
-		if self.izq < other.izq && other.izq < self.der
-			return true
-		elsif self.izq < other.izq && other.izq == self.der && (self.der_in==other.izq_in)==true
-			return true
-		elsif self.izq == other.izq && (self.izq_in==other.izq_in)==true
-			return true
-		elsif self.izq == other.izq && (self.izq_in==other.izq_in)==false && other.izq < self.der
-			return true
-		elsif self.izq == other.izq && (self.izq_in!=other.izq_in)
-			if self.der > self.izq && other.der > other.izq
-				return true
-			else
-				return false
-			end
-		else
-			return false
-		end
-		#Vemos si self esta dentro
-		if other.izq < self.izq && self.izq < other.der
-			return true
-		elsif other.izq < self.izq && self.izq == other.der && (other.der_in==self.izq_in)==true
-			return true
-		elsif other.izq == self.izq && (other.izq_in==self.izq_in)==true
-			return true
-		elsif other.izq == self.izq && (other.izq_in==self.izq_in)==false && self.izq < other.der
-			return true
-		elsif other.izq == self.izq && (other.izq_in!=self.izq_in)
-			if other.der > other.izq && self.der > self.izq
-				return true
-			else
-				return false
-			end
-		else
-			return false
-		end
 	end
 end
 
