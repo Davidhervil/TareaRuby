@@ -38,14 +38,16 @@ class Interval
 		if other == Empty.instance || self == Empty.instance
 			return false
 		else
+			#puts "Al Principio"
 			#Vemos si other esta dentro
 			if self.izq < other.izq && other.izq < self.der
 				return true
-			elsif self.izq < other.izq && other.izq == self.der && (self.der_in==other.izq_in)==true
+			elsif self.izq < other.izq && other.izq == self.der && self.der_in==true && other.izq_in==true
+				#puts "Aqui"
 				return true
-			elsif self.izq == other.izq && (self.izq_in==other.izq_in)==true
+			elsif self.izq == other.izq && self.izq_in==true && other.izq_in==true
 				return true
-			elsif self.izq == other.izq && (self.izq_in==other.izq_in)==false && other.izq < self.der
+			elsif self.izq == other.izq && self.izq_in==false && other.izq_in==false && other.izq < self.der
 				return true
 			elsif self.izq == other.izq && (self.izq_in!=other.izq_in)
 				if self.der > self.izq && other.der > other.izq
@@ -54,15 +56,16 @@ class Interval
 					return false
 				end
 			end
+			#puts "En medio"
 			#Sino
 			#Vemos si self esta dentro
 			if other.izq < self.izq && self.izq < other.der
 				return true
-			elsif other.izq < self.izq && self.izq == other.der && (other.der_in==self.izq_in)==true
+			elsif other.izq < self.izq && self.izq == other.der && other.der_in==true && self.izq_in==true
 				return true
-			elsif other.izq == self.izq && (other.izq_in==self.izq_in)==true
+			elsif other.izq == self.izq && other.izq_in==true && self.izq_in==true
 				return true
-			elsif other.izq == self.izq && (other.izq_in==self.izq_in)==false && self.izq < other.der
+			elsif other.izq == self.izq && other.izq_in==false && self.izq_in==false && self.izq < other.der
 				return true
 			elsif other.izq == self.izq && (other.izq_in!=self.izq_in)
 				if other.der > other.izq && self.der > self.izq
@@ -98,7 +101,8 @@ class Interval
 				maxizqin = other.izq_in
 			end
 
-			if minder == maxizq
+			if minder == maxizq #Si se rozan
+				puts maxizqin || minderin
 				return maxizqin || minderin
 			else
 				return false
