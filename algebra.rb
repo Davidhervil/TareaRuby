@@ -156,7 +156,7 @@ class Literal < Interval
 
 	def union other
 		if self.unites? other
-			other.union_literal
+			other.union_literal self
 		else
 			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
 		end
