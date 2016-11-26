@@ -119,7 +119,7 @@ class Literal < Interval
 		else
 			return false
 		end
-
+	end
 end
 
 class RightInfinite < Interval
