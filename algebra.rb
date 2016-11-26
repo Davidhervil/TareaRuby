@@ -12,9 +12,9 @@ class Interval
 		#OJO ARREGLAR
 	end
 
-	def to_s
+	def to_s #Estar Pendiente de quitar los Infinity del print
 		if self.empty?
-			"Vacio"
+			"empty"
 		else
 			if self.izq_in == true
 				l='['
@@ -50,12 +50,76 @@ class Literal < Interval
 	end
 
 	def intersection other
-	
+		if other == Empty.instance || not(self.intersect?(other))
+			Empty.instance
+		else
+			if self.izq == other.izq && (self.izq_in!=other.izq_in)
+				l = self.izq
+				lin = not(self.izq_in)? self.izq_in : other.izq_in
+			elsif self.izq >= other.izq
+				l = self.izq
+				lin = self.izq_in
+			else
+				l = other.izq
+				lin = other.izq_in
+			end
+
+			if self.der == other.der && (self.der_in!=other.der_in)
+				d = self.der
+				din = not(self.der_in)? self.der_in : other.der_in
+			elsif self.der <= other.der
+				d = self.der
+				din = self.der_in
+			else
+				d = other.der
+				din = other.der_in
+			end
+			Literal.new(l,d,lin,din)
+		end
 	end
 
 	def union other
 
 	end
+
+	def intersect? other
+		#Vemos si other esta dentro
+		if self.izq < other.izq && other.izq < self.der
+			return true
+		elsif self.izq < other.izq && other.izq == self.der && (self.der_in==other.izq_in)==true
+			return true
+		elsif self.izq == other.izq && (self.izq_in==other.izq_in)==true
+			return true
+		elsif self.izq == other.izq && (self.izq_in==other.izq_in)==false && other.izq < self.der
+			return true
+		elsif self.izq == other.izq && (self.izq_in!=other.izq_in)
+			if self.der > self.izq && other.der > other.izq
+				return true
+			else
+				return false
+			end
+		else
+			return false
+		end
+		#Vemos si self esta dentro
+		if other.izq < self.izq && self.izq < other.der
+			return true
+		elsif other.izq < self.izq && self.izq == other.der && (other.der_in==self.izq_in)==true
+			return true
+		elsif other.izq == self.izq && (other.izq_in==self.izq_in)==true
+			return true
+		elsif other.izq == self.izq && (other.izq_in==self.izq_in)==false && self.izq < other.der
+			return true
+		elsif other.izq == self.izq && (other.izq_in!=self.izq_in)
+			if other.der > other.izq && self.der > self.izq
+				return true
+			else
+				return false
+			end
+		else
+			return false
+		end
+
 end
 
 class RightInfinite < Interval
