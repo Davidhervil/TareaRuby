@@ -34,7 +34,7 @@ class Interval
 		self == Empty.instance
 	end
 
-	def intersect? other
+	def intersects? other
 		if other == Empty.instance || self == Empty.instance
 			return false
 		else
@@ -54,6 +54,7 @@ class Interval
 					return false
 				end
 			end
+			#Sino
 			#Vemos si self esta dentro
 			if other.izq < self.izq && self.izq < other.der
 				return true
@@ -69,6 +70,36 @@ class Interval
 				else
 					return false
 				end
+			else
+				return false
+			end
+		end
+	end
+
+	def unites? other
+		if self.intersects? other
+			return true
+		elsif other == Empty.instance || self == Empty.instance
+			return false
+		else
+			if self.der < other.der
+				minder = self.der
+				minderin = self.der_in
+			else
+				minder = other.der
+				minderin = other.der_in
+			end
+
+			if self.izq > other.izq
+				maxizq = self.izq
+				maxizqin = self.izq_in
+			else
+				maxizq = other.izq
+				maxizqin = other.izq_in
+			end
+
+			if minder == maxizq
+				return maxizqin || minderin
 			else
 				return false
 			end
