@@ -131,7 +131,7 @@ class Literal < Interval
 		else
 			if self.izq == other.izq && (self.izq_in!=other.izq_in)
 				l = self.izq
-				lin = not(self.izq_in)? self.izq_in : other.izq_in
+				lin = not(self.izq_in) ? self.izq_in : other.izq_in
 			elsif self.izq >= other.izq
 				l = self.izq
 				lin = self.izq_in
@@ -142,7 +142,7 @@ class Literal < Interval
 
 			if self.der == other.der && (self.der_in!=other.der_in)
 				d = self.der
-				din = not(self.der_in)? self.der_in : other.der_in
+				din = not(self.der_in) ? self.der_in : other.der_in
 			elsif self.der <= other.der
 				d = self.der
 				din = self.der_in
@@ -162,23 +162,36 @@ class Literal < Interval
 		end
 	end
 
-	def union_literal other
-		if self.unites? other
-			#No he comenzado
-			if self.izq < other.izq
+	def union_literal lit
+		if self.unites? lit
+			if self.izq < lit.izq
 				l = self.izq
 				lin = self.izq_in
-			else
-				l = other.izq
-				lin = other.izq_in #OJO QUE FALTA EL CASO EN EL QUE SON IGUALES CON NICLUSION DIFERENTE. GANA true
+			elsif self.izq > lit.izq
+				l = lit.izq
+				lin = lit.izq_in
+			else 
+				l = self.izq
+				if self.izq_in == lit.izq_in
+					lin = self.izq_in
+				else # CASO EN EL QUE SON IGUALES CON INCLUSION DIFERENTE. GANA true
+					lin = self.izq_in ? self.izq_in : lit.izq_in
+				end
 			end
 
-			if self.der > other.der
+			if self.der > lit.der
 				d = self.der
 				din = self.der_in
-			else
-				d = other.der
-				din = other.der_in#OJO QUE FALTA EL CASO EN EL QUE SON IGUALES CON NICLUSION DIFERENTE. GANA true
+			elsif self.der < lit.der
+				d = lit.der
+				din = lit.der_in
+			else 
+				d = self.der
+				if self.der_in == lit.der_in
+					din = self.der_in
+				else # CASO EN EL QUE SON IGUALES CON INCLUSION DIFERENTE. GANA true
+					din = self.der_in ? self.der_in : lit.der_in
+				end
 			end
 			Literal.new(l,d,lin,din)
 		else
