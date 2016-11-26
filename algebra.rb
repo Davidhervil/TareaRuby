@@ -155,8 +155,37 @@ class Literal < Interval
 	end
 
 	def union other
-
+		if self.unites? other
+			other.union_literal
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
 	end
+
+	def union_literal other
+		if self.unites? other
+			#No he comenzado
+			if self.izq < other.izq
+				l = self.izq
+				lin = self.izq_in
+			else
+				l = other.izq
+				lin = other.izq_in #OJO QUE FALTA EL CASO EN EL QUE SON IGUALES CON NICLUSION DIFERENTE. GANA true
+			end
+
+			if self.der > other.der
+				d = self.der
+				din = self.der_in
+			else
+				d = other.der
+				din = other.der_in#OJO QUE FALTA EL CASO EN EL QUE SON IGUALES CON NICLUSION DIFERENTE. GANA true
+			end
+			Literal.new(l,d,lin,din)
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
+	end
+	union_literal
 end
 
 class RightInfinite < Interval
