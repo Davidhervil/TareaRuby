@@ -185,7 +185,6 @@ class Literal < Interval
 			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
 		end
 	end
-	union_literal
 end
 
 class RightInfinite < Interval
