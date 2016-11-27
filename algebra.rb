@@ -585,7 +585,7 @@ def main
 						if variables.has_key? var
 							andaux = andaux.intersection(variables[var])	
 						else
-							puts "La variable #{var} no existe."
+							puts "La variable '#{var}' no existe."
 							error = true
 							break
 						end
