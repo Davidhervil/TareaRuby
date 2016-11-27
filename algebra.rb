@@ -4,7 +4,7 @@ class Interval
 	attr_reader :izq, :der, :izq_in, :der_in
 	# Verificar si es mejor hacer las inclusiones con un numero
 	# y sumarselo siempre CHECKED-RECHECKED
-	def initialize izq, der, izq_in=true, der_in=true
+	def initialize izq, der, izq_in=true, der_in=true#Meter condiciones extra
 		@izq = izq
 		@der = der
 		@izq_in = izq_in
@@ -102,7 +102,6 @@ class Interval
 			end
 
 			if minder == maxizq #Si se rozan
-				puts maxizqin || minderin
 				return maxizqin || minderin
 			else
 				return false
@@ -119,14 +118,18 @@ end
 
 class Literal < Interval
 	def initialize izq, der, izq_in = true, der_in = true
-		@izq = izq
-		@der = der
-		@izq_in = izq_in
-		@der_in = der_in
+		if izq>der || izq == -(Float::INFINITY) || der == Float::INFINITY || (izq == der && ( izq_in!=der || (izq_in==false && der_in == false) ) )
+			raise "Los argumentos introducidos no fueron los de un Literal."
+		else
+			@izq = izq
+			@der = der
+			@izq_in = izq_in
+			@der_in = der_in
+		end
 	end
 
 	def intersection other
-		if other == Empty.instance || not(self.intersect?(other))
+		if other == Empty.instance || not(self.intersects?(other))
 			Empty.instance
 		else
 			if self.izq == other.izq && (self.izq_in!=other.izq_in)
@@ -152,6 +155,18 @@ class Literal < Interval
 			end
 			Literal.new(l,d,lin,din)
 		end
+	end
+
+	def intersection_rightInfinite rinf
+		self.intersection rinf
+	end
+
+	def intersection_leftInfinite linf
+		self.intersection linf
+	end
+
+	def intersection_allReals allr
+		self.intersection allr
 	end
 
 	def union other
@@ -198,27 +213,100 @@ class Literal < Interval
 			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
 		end
 	end
+
+	def union_rightInfinite rinf
+		if self.unites? rinf
+			if self.izq < rinf.izq
+				l = self.izq
+				lin = self.izq_in
+			elsif self.izq > rinf.izq
+				l = rinf.izq
+				lin = rinf.izq_in
+			else 
+				l = self.izq
+				if self.izq_in == rinf.izq_in
+					lin = self.izq_in
+				else # CASO EN EL QUE SON IGUALES CON INCLUSION DIFERENTE. GANA true
+					lin = self.izq_in ? self.izq_in : rinf.izq_in
+				end
+			end
+			RightInfinite.new(l,lin)
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
+	end
+
 end
 
 class RightInfinite < Interval
-	def initialize izq, izq_in = true
+	def initialize izq, izq_in = true #Meter condiciones extra
 		@izq = izq
 		@der = Float::INFINITY
-		@der_in = false
 		@izq_in = izq_in
+		@der_in = false
 	end
 
 	def intersection other
-	
+		if other == Empty.instance || not(self.intersects?(other))
+			Empty.instance
+		else
+			other.intersection_rightInfinite self
+		end
+	end
+
+	def intersection_rightInfinite rinf
+		if self.izq > rinf.izq
+			l = self.izq
+			lin = self.izq_in
+		elsif self.izq == rinf.izq
+			l = self.izq
+			lin = not(self.izq_in) ? self.izq_in : rinf.izq_in
+		else
+			l = rinf.izq
+			lin = rinf.izq_in
+		end
+		RightInfinite.new(l,lin)
 	end
 
 	def union other
-
+		if self.unites? other
+			other.union_rightInfinite self
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
 	end
+
+	def union_literal lit
+		if self.unites? lit
+			#Porque es lo mismo a copiar union_rightInfinite de Literal
+			lit.union_rightInfinite self
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
+	end
+
+	def union_rightInfinite rinf
+		if self.izq < rinf.izq
+			l = self.izq
+			lin = self.izq_in
+		elsif self.izq > rinf.izq
+			l = rinf.izq
+			lin = rinf.izq_in
+		else 
+			l = self.izq
+			if self.izq_in == rinf.izq_in
+				lin = self.izq_in
+			else # CASO EN EL QUE SON IGUALES CON INCLUSION DIFERENTE. GANA true
+				lin = self.izq_in ? self.izq_in : rinf.izq_in
+			end
+		end
+		RightInfinite.new(l,lin)
+	end
+
 end
 
 class LeftInfinite < Interval
-	def initialize der, der_in = true
+	def initialize der, der_in = true#Meter condiciones extra
 		@der = der
 		@izq = -(Float::INFINITY)
 		@izq_in = false
@@ -228,15 +316,35 @@ class LeftInfinite < Interval
 	def intersection other
 	
 	end
+	def intersection_rightInfinite rinf
+	end
+
+	def intersection_leftInfinite linf
+	end
+
+	def intersection_allReals allr
+	end
 
 	def union other
 
+	end
+
+	def union_literal lit
+	end
+
+	def union_rightInfinite rinf
+	end
+
+	def union_leftInfinite linf
+	end
+	
+	def union_allReals allr
 	end
 end
 
 class AllReals < Interval
 	include Singleton
-	def initialize
+	def initialize#Meter condiciones extra
 		@izq = -(Float::INFINITY)
 		@der = Float::INFINITY
 		@izq_in = false
@@ -246,15 +354,35 @@ class AllReals < Interval
 	def intersection other
 	
 	end
+	def intersection_rightInfinite rinf
+	end
+
+	def intersection_leftInfinite linf
+	end
+
+	def intersection_allReals allr
+	end
 
 	def union other
 
+	end
+
+	def union_literal lit
+	end
+
+	def union_rightInfinite rinf
+	end
+
+	def union_leftInfinite linf
+	end
+	
+	def union_allReals allr
 	end
 end
 
 class Empty < Interval
 	include Singleton
-	def initialize
+	def initialize#Meter condiciones extra
 	end
 
 	def intersection other
