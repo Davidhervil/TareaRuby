@@ -129,7 +129,7 @@ class Literal < Interval
 	end
 
 	def intersection other
-		if other == Empty.instance || not(self.intersects?(other))
+		if not(self.intersects?(other))
 			Empty.instance
 		else
 			if self.izq == other.izq && (self.izq_in!=other.izq_in)
@@ -165,8 +165,8 @@ class Literal < Interval
 		self.intersection linf
 	end
 
-	def intersection_allReals allr
-		self.intersection allr
+	def intersection_allReals allr #por ahora no
+		self
 	end
 
 	def union other
@@ -236,6 +236,31 @@ class Literal < Interval
 		end
 	end
 
+	def union_leftInfinite linf
+		if self.unites? linf
+			if self.der > linf.der
+				d = self.der
+				din = self.der_in
+			elsif self.der < linf.der
+				d = linf.der
+				din = linf.der_in
+			else 
+				d = self.der
+				if self.der_in == linf.der_in
+					din = self.der_in
+				else # CASO EN EL QUE SON IGUALES CON INCLUSION DIFERENTE. GANA true
+					din = self.der_in ? self.der_in : linf.der_in
+				end
+			end
+			LeftInfinite.new(d,din)
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end 
+	end
+
+	def union_allReals allr #por ahora no
+		AllReals.instance
+	end
 end
 
 class RightInfinite < Interval
@@ -247,7 +272,7 @@ class RightInfinite < Interval
 	end
 
 	def intersection other
-		if other == Empty.instance || not(self.intersects?(other))
+		if not(self.intersects?(other))
 			Empty.instance
 		else
 			other.intersection_rightInfinite self
@@ -266,6 +291,18 @@ class RightInfinite < Interval
 			lin = rinf.izq_in
 		end
 		RightInfinite.new(l,lin)
+	end
+
+	def intersection_leftInfinite linf
+		if self.intersects? linf
+			l = self.izq
+			lin = self.izq_in
+			d = linf.der
+			din = linf.der_in
+			Literal.new(l,d,lin,din)
+		else
+			Empty.instance
+		end
 	end
 
 	def union other
@@ -303,6 +340,13 @@ class RightInfinite < Interval
 		RightInfinite.new(l,lin)
 	end
 
+	def union_leftInfinite linf #por ahora no
+		if self.unites? linf
+			AllReals.instance
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
+	end
 end
 
 class LeftInfinite < Interval
@@ -314,31 +358,80 @@ class LeftInfinite < Interval
 	end
 
 	def intersection other
-	
+		if not(self.intersects?(other))
+			Empty.instance
+		else
+			other.intersection_leftInfinite self
+		end
 	end
+
 	def intersection_rightInfinite rinf
+		if self.intersects? rinf
+			l = self.izq
+			lin = self.izq_in
+			d = rinf.der
+			din = rinf.der_in
+			Literal.new(l,d,lin,din)
+		else
+			Empty.instance
+		end
 	end
 
 	def intersection_leftInfinite linf
-	end
-
-	def intersection_allReals allr
+		if self.der < linf.der
+			d = self.der
+			din = self.der_in
+		elsif self.der == linf.der
+			d = self.der
+			din = not(self.der_in) ? self.der_in : linf.der_in
+		else
+			d = linf.der
+			din = linf.der_in
+		end
+		LeftInfinite.new(d,din)
 	end
 
 	def union other
-
+		if self.unites? other
+			other.union_leftInfinite self
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
 	end
 
 	def union_literal lit
+		if self.unites? lit
+			#Porque es lo mismo a copiar union_leftInfinite de Literal
+			lit.union_leftInfinite self
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
 	end
 
 	def union_rightInfinite rinf
+		if self.unites? rinf
+			AllReals.instance
+		else
+			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
+		end
 	end
 
 	def union_leftInfinite linf
-	end
-	
-	def union_allReals allr
+		if self.der > linf.der
+			d = self.der
+			din = self.der_in
+		elsif self.der < linf.der
+			d = linf.der
+			din = linf.der_in
+		else 
+			d = self.der
+			if self.der_in == linf.der_in
+				din = self.der_in
+			else # CASO EN EL QUE SON IGUALES CON INCLUSION DIFERENTE. GANA true
+				din = self.der_in ? self.der_in : linf.der_in
+			end
+		end
+		LeftInfinite.new(d,din)
 	end
 end
 
@@ -352,31 +445,34 @@ class AllReals < Interval
 	end
 
 	def intersection other
-	
+		other
 	end
+	
 	def intersection_rightInfinite rinf
+		rinf
 	end
 
 	def intersection_leftInfinite linf
-	end
-
-	def intersection_allReals allr
+		linf
 	end
 
 	def union other
-
+		if other == Empty.instance
+			raise "No se puede unir con el intervalo vacio"
+		else
+			self
+		end
 	end
 
 	def union_literal lit
+		self
 	end
 
 	def union_rightInfinite rinf
+		self
 	end
 
 	def union_leftInfinite linf
-	end
-	
-	def union_allReals allr
 	end
 end
 
@@ -386,10 +482,10 @@ class Empty < Interval
 	end
 
 	def intersection other
-	
+		self
 	end
 
 	def union other
-
+		raise "No se puede unir el intervalo vacio"
 	end
 end
