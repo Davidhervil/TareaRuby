@@ -120,7 +120,7 @@ end
 
 class Literal < Interval
 	def initialize izq, der, izq_in = true, der_in = true
-		if izq>der || izq == -(Float::INFINITY) || der == (Float::INFINITY) || (izq == der && ( izq_in!=der || (izq_in==false && der_in == false) ) )
+		if izq>der || izq == -(Float::INFINITY) || der == (Float::INFINITY) || (izq == der && ( izq_in!=der_in || (izq_in==false && der_in == false) ) )
 			raise "Los argumentos introducidos no fueron los de un Literal."
 		else
 			@izq = izq
@@ -373,10 +373,11 @@ class LeftInfinite < Interval
 
 	def intersection_rightInfinite rinf
 		if self.intersects? rinf
-			l = self.izq
-			lin = self.izq_in
-			d = rinf.der
-			din = rinf.der_in
+			d = self.der
+			din = self.der_in
+			l = rinf.izq
+			lin = rinf.izq_in
+			puts [l ,d, lin, din]
 			Literal.new(l,d,lin,din)
 		else
 			Empty.instance
@@ -479,6 +480,7 @@ class AllReals < Interval
 	end
 
 	def union_leftInfinite linf
+		self
 	end
 end
 
@@ -494,4 +496,7 @@ class Empty < Interval
 	def union other
 		raise "No se puede unir el intervalo vacio"
 	end
+end
+
+def main
 end
