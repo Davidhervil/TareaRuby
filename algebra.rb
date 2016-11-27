@@ -26,7 +26,9 @@ class Interval
 			else
 				d = ')'
 			end
-			l + self.izq.to_s + ',' + self.der.to_s + d
+			lcont = (self.izq!= -(Float::INFINITY)) ? self.izq.to_s : ''
+			rcont = (self.der!= (Float::INFINITY)) ? self.der.to_s : ''
+			l + lcont + ',' + rcont + d
 		end
 	end
 
@@ -118,7 +120,7 @@ end
 
 class Literal < Interval
 	def initialize izq, der, izq_in = true, der_in = true
-		if izq>der || izq == -(Float::INFINITY) || der == Float::INFINITY || (izq == der && ( izq_in!=der || (izq_in==false && der_in == false) ) )
+		if izq>der || izq == -(Float::INFINITY) || der == (Float::INFINITY) || (izq == der && ( izq_in!=der || (izq_in==false && der_in == false) ) )
 			raise "Los argumentos introducidos no fueron los de un Literal."
 		else
 			@izq = izq
@@ -265,11 +267,11 @@ end
 
 class RightInfinite < Interval
 	def initialize izq, izq_in = true #Meter condiciones extra
-		if izq == Float::INFINITY || izq == -(Float::INFINITY)
+		if izq == (Float::INFINITY) || izq == -(Float::INFINITY)
 			raise "Los argumentos utilizados no son los de un RightInfinite"
 		else
 			@izq = izq
-			@der = Float::INFINITY
+			@der = (Float::INFINITY)
 			@izq_in = izq_in
 			@der_in = false
 		end
@@ -355,7 +357,7 @@ end
 
 class LeftInfinite < Interval
 	def initialize der, der_in = true#Meter condiciones extra
-		if der == Float::INFINITY || der == -(Float::INFINITY)
+		if der == (Float::INFINITY) || der == -(Float::INFINITY)
 			raise "Los argumentos pasados no son los de un LeftInfinite"
 		else
 			@der = der
@@ -447,7 +449,7 @@ class AllReals < Interval
 	include Singleton
 	def initialize#Meter condiciones extra
 		@izq = -(Float::INFINITY)
-		@der = Float::INFINITY
+		@der = (Float::INFINITY)
 		@izq_in = false
 		@der_in = false
 	end
