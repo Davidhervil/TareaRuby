@@ -575,26 +575,33 @@ def main
 			if command == "exit"
 				break
 			else
-				ortemp.clear
-				ortemp = Hash.new(AllReals.instance)
 				ors_op = command.split(/[\s]*\|[\s]*/)#Estar pendiente por si la estrella de klein no es
+				result = nil
+				error = false
 				for orop in ors_op
-					andtemp = Hash.new(AllReals.instance) #diccionario auxiliar de los and
+					andaux = AllReals.instance
 					ands_op = orop.split(/[\s]*&[\s]*/)#parece que no hay que escapear el and
-					for andop in ands_op
-						expresion = andop.split(/[\s]+/)#Asumimos que tiene los espacios, sino hay que recorrer manual
-						if andtemp.has_key? expresion[variable]
-							interv = obtener_intervalo(expresion)
-							andtemp[expresion[variable]] = andtemp[expresion[variable]].intersection(interv)
+					for var in ands_op
+						if variables.has_key? var
+							andaux = andaux.intersection(variables[var])	
 						else
-							andtemp[expresion[variable]] = obtener_intervalo(expresion)
+							puts "La variable #{var} no existe."
+							error = true
+							break
 						end
 					end
-					ortemp = ortemp.merge(andtemp){|key,orval,andval| orval.union andval}
+					if not(error)
+						if result != nil
+							result = result.union andaux
+						else
+							result = andaux
+						end
+					else
+						break
+					end
 				end
-				ortemp = variables.merge(ortemp){|key,varval,orval| varval.union orval}
-				for pair in ortemp
-					mostrar pair
+				if not(error)
+					puts result
 				end
 			end
 		end
