@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 require 'singleton'
 
 class Interval
@@ -499,4 +500,14 @@ class Empty < Interval
 end
 
 def main
+	if ARGV.length !=1
+		puts "Error, numero de argumentos invalido"
+	else
+		f = File.open(ARGV[0],"r")
+		#a cada linea hacerle split por '|' eso las separa las operaciones con la precedencia correcta.
+		#y en cada una de esas tienes las operaciones con '&'
+		#detalles por implementar
+	end
 end
+
+main
