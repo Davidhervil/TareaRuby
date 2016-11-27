@@ -658,7 +658,7 @@ end
 # La variable, operador de comparación y el número *deben* estar separadas por espacio.
 def main
 	if ARGV.length !=1
-		puts "Error, número de argumentos invalido"
+		puts "Error, número de argumentos inválido"
 	else
 		f = File.open(ARGV[0],"r")
 		variables = Hash.new(AllReals.instance) #Tabla de Símbolos
