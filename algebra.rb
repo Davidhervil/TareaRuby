@@ -591,11 +591,7 @@ def main
 						end
 					end
 					if not(error)
-						if result != nil
-							result = result.union andaux
-						else
-							result = andaux
-						end
+						result = result ? (result.union andaux) : andaux
 					else
 						break
 					end
