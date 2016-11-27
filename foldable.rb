@@ -1,8 +1,17 @@
+##
+# Este mixin representa el comprotamiento de _Plegado_.
+# Se asume que la clase donde se vaya a incluir tiene el método +foldr+
 module Fold
+    ##
+    # Predicado que dice si la estructura plegable está vacia (+true+)
+    # o no (+false+)
     def null?
         self.foldr(true) {|a| false}
     end
-
+    
+    ##
+    # Método que recibe un bloque y utiliza de valor base para el plegado
+    # el úiltimo elemento de la estructura plegable.
     def foldr1 &block
         if not self.null?
             self.foldr(nil) {|e,ac| ac ? block.call(e,ac) : e}
@@ -10,25 +19,51 @@ module Fold
             raise "Estructura vacia"
         end
     end
+
+    ##
+    # Método que calcula la longitud de la estructura plegable
     def length
         self.foldr(0) { |e,ac| ac+1 }
     end
+    
+    ##
+    # Predicado que dice si todos los elementos de la estructura plegable
+    # cumplen con el predicado bloque de argumento
     def all? &block
         self.foldr(true) { |e,ac| ac && block.call(e)}
     end
+    
+    ##
+    # Predicado que dice si alguno los elementos de la estructura plegable
+    # cumple con el predicado bloque de argumento
     def any? &block
         self.foldr(false) { |e,ac| ac || block.call(e)}
     end
+    
+    ##    
+    # Método que devuelve un +Array+ con el resultado de aplanar mediante
+    # +foldr+ la estructura plegable
     def to_arr
         self.foldr([]) { |e,ac| ac.unshift(e)}
     end
+    
+    ##
+    # Predicado que dice si el elemento +to_find+ pertenece o no a la estructura
+    # plegable.
     def elem? to_find
         self.any? { |e| e == to_find}
     end
 end
 
+##
+# Adicíon del método +foldr+ a la clase +Array+
+# Se asume que la clase donde se vaya a incluir tiene el método +foldr+
 class Array
     include Fold
+    ##
+    # El método +foldr+ recibe un valor base +e+ y un bloque +b+ el cual se
+    # asume como un f \:\: a -> b -> b donde _a_ es el tipo base de la lista a plegar.
+    # Retorna el valor de haber aplicado f(elem1, f(elem2,...f(elemn,e))).
     def foldr e, &b 
         #reverse.inject(e) { |acum,elem| elem.send(b,acum)}
         #Otra posible opcion es invertir el arreglo y hacerle fold norml con un ciclo.
@@ -41,19 +76,32 @@ class Array
     end
 end
 
+##
+# Clase que representa un Árbol n-ario
 class Rose
     include Fold
     attr_accessor :elem, :children
+    ##
+    # Crea un nuevo árbol y de no recibir argumento +children+ por defecto es
+    # la lista vacía. Notar que no puede haber un árbol vacío. Se aprovecho ese
+    # aspecto en la implementación del +foldr+.
     def initialize elem, children = []
         @elem = elem
         @children = children
     end
 
+    ##
+    # Añade un nuevo elemento al árbol y retorna el árbol resultante.
     def add elem
         @children.push elem
         self
     end
 
+    ##
+    # El método +foldr+ recibe un valor base +e+ y un bloque +b+ el cual se
+    # asume como un f \:\: a -> b -> b donde _a_ es el tipo base del árbol a plegar.
+    # Retorna el valor de haber plegado el árbol desde el elemento más a la derecha
+    # hasta el más a la izquierda
     def foldr e, &b
         # Su código aquí
         acum = e
@@ -67,7 +115,9 @@ class Rose
 
         b.call(self.elem, acum)
     end
-
+    ##
+    # Método que calcula el promedio de los elementos del árbol utilizando
+    # +foldr1+ del mixin +Fold+.
     def avg
         total = 1.0
         suma = 0.0

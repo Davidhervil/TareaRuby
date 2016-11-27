@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'singleton'
-
+##
+#
 class Interval
 	attr_reader :izq, :der, :izq_in, :der_in
 
@@ -167,10 +168,6 @@ class Literal < Interval
 
 	def intersection_leftInfinite linf
 		self.intersection linf
-	end
-
-	def intersection_allReals allr #por ahora no
-		self
 	end
 
 	def union other
@@ -562,7 +559,7 @@ def main
 			end
 			variables = variables.merge(ortemp){|key,varval,orval| varval.union orval}
 		end
-
+		f.close
 		#Mostramos los resultados
 		for pair in variables
 			mostrar pair
