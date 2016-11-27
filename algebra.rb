@@ -1,8 +1,13 @@
 #!/usr/bin/env ruby
 require 'singleton'
 ##
-#
+# Clase padre que de los intervalos. No debe instanciarse. A menos que se especifique,
+# la inclusión de los extremos reales de los intervalos es +true+ por defecto
 class Interval
+	##
+	# Se decidió no permitir modificaciones en los parámetros de un intervalo
+	# pues el cambiar alguno de los mismos implica un intervalo completamente
+	# nuevo. Es por eso que los atributos son sólo readable.
 	attr_reader :izq, :der, :izq_in, :der_in
 
 	def initialize izq, der, izq_in=true, der_in=true#Meter condiciones extra
@@ -15,6 +20,8 @@ class Interval
 		#Hace falta verificar si estos estan correctos ?
 	end
 
+	##
+	# Convierte a _printable_ un intervalo
 	def to_s
 		if self.empty?
 			"empty"
@@ -35,10 +42,15 @@ class Interval
 		end
 	end
 
+	##
+	# Predicado que dice si un intervalo es el intervalo vacío
 	def empty?
 		self == Empty.instance
 	end
 
+	##
+	# Predicado que dice si el intervalo en cuestión intersecta (+true+) o no
+	# (+false+) con el intervlo +other+.
 	def intersects? other
 		if other == Empty.instance || self == Empty.instance
 			return false
@@ -48,7 +60,6 @@ class Interval
 			if self.izq < other.izq && other.izq < self.der
 				return true
 			elsif self.izq < other.izq && other.izq == self.der && self.der_in==true && other.izq_in==true
-				#puts "Aqui"
 				return true
 			elsif self.izq == other.izq && self.izq_in==true && other.izq_in==true
 				return true
@@ -84,6 +95,8 @@ class Interval
 		end
 	end
 
+	##
+	# Predicado que dice si el intervalo en cuestión permite unión con el intervalo +other+
 	def unites? other
 		if self.intersects? other
 			return true
@@ -113,15 +126,15 @@ class Interval
 			end
 		end
 	end
-
-	def empt? i, d, izn, den
-		i>d || ( i == d && ( ((false == izn )== den) || ( izn != den )))
-	end
-
-	private :empt?
 end
 
+##
+# Clase que representa los intervalos acotados por ambos lados.
 class Literal < Interval
+	##
+	# Por defecto +izq_in+ y +der_in+ son +true+. Es decir los extremos
+	# del intervalo están incluidos. No se permite introducir parámetros
+	# que describan intervalos diferentes a literales.
 	def initialize izq, der, izq_in = true, der_in = true
 		if izq>der || izq == -(Float::INFINITY) || der == (Float::INFINITY) || (izq == der && ( izq_in!=der_in || (izq_in==false && der_in == false) ) )
 			raise "Los argumentos introducidos no fueron los de un Literal."
@@ -133,6 +146,9 @@ class Literal < Interval
 		end
 	end
 
+	##
+	# Método que retorna el intervalo resultante de intersectar con +other+.
+	# Las intersecciones con +Literal+ siempre dan Literals o vacío.
 	def intersection other
 		if not(self.intersects?(other))
 			Empty.instance
@@ -161,15 +177,22 @@ class Literal < Interval
 			Literal.new(l,d,lin,din)
 		end
 	end
-
+	
+	##
+	# Método necesario para el doble despacho de intersecciones con +RightInfinite+s.
 	def intersection_rightInfinite rinf
 		self.intersection rinf
 	end
 
+	##
+	# Método necesario para el doble despacho de intersecciones con +LeftInfinite+s.
 	def intersection_leftInfinite linf
 		self.intersection linf
 	end
 
+	##
+	# Método que retorna el intervalo resultante, de ser así posible, de la 
+	# unión con +other+. Si no es posible se arroja una exepción.
 	def union other
 		if self.unites? other
 			other.union_literal self
@@ -178,6 +201,9 @@ class Literal < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con literales.
+	# Se asume que +lit+ siempre es un +Literal+
 	def union_literal lit
 		if self.unites? lit
 			if self.izq < lit.izq
@@ -215,6 +241,8 @@ class Literal < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +RightInfinite+s.
 	def union_rightInfinite rinf
 		if self.unites? rinf
 			if self.izq < rinf.izq
@@ -237,6 +265,8 @@ class Literal < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +LeftInfinite+s.
 	def union_leftInfinite linf
 		if self.unites? linf
 			if self.der > linf.der
@@ -260,7 +290,12 @@ class Literal < Interval
 	end
 end
 
+##
+# Clase que representa los intervalos no acotados por la derecha.
 class RightInfinite < Interval
+	##
+	# Si se introducen argumentos que describan intervalos diferentes a un
+	# +RightInfinite+ se genera una expeción.
 	def initialize izq, izq_in = true
 		if izq == (Float::INFINITY) || izq == -(Float::INFINITY)
 			raise "Los argumentos utilizados no son los de un RightInfinite"
@@ -272,6 +307,9 @@ class RightInfinite < Interval
 		end
 	end
 
+	##
+	# Método que retorna el intervalo resultante de intersectar con +other+.
+	# Se implementa con doble despacho.
 	def intersection other
 		if not(self.intersects?(other))
 			Empty.instance
@@ -280,6 +318,8 @@ class RightInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el doble despacho de intersecciones con +RightInfinite+s.
 	def intersection_rightInfinite rinf
 		if self.izq > rinf.izq
 			l = self.izq
@@ -294,6 +334,8 @@ class RightInfinite < Interval
 		RightInfinite.new(l,lin)
 	end
 
+	##
+	# Método necesario para el doble despacho de intersecciones con +LeftInfinite+s.
 	def intersection_leftInfinite linf
 		if self.intersects? linf
 			l = self.izq
@@ -306,6 +348,9 @@ class RightInfinite < Interval
 		end
 	end
 
+	##
+	# Método que retorna el intervalo resultante, de ser así posible, de la 
+	# unión con +other+. Si no es posible se arroja una exepción.
 	def union other
 		if self.unites? other
 			other.union_rightInfinite self
@@ -314,6 +359,9 @@ class RightInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con literales.
+	# Se asume que +lit+ siempre es un +Literal+
 	def union_literal lit
 		if self.unites? lit
 			#Porque es lo mismo a copiar union_rightInfinite de Literal
@@ -323,6 +371,8 @@ class RightInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +RightInfinite+s.
 	def union_rightInfinite rinf
 		if self.izq < rinf.izq
 			l = self.izq
@@ -341,6 +391,8 @@ class RightInfinite < Interval
 		RightInfinite.new(l,lin)
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +LeftInfinite+s.
 	def union_leftInfinite linf
 		if self.unites? linf
 			AllReals.instance
@@ -350,7 +402,12 @@ class RightInfinite < Interval
 	end
 end
 
+##
+# Clase que representa los intervalos no acotados po la izquierda.
 class LeftInfinite < Interval
+	##
+	# Si se introducen argumentos que describan intervalos diferentes a un
+	# +LeftInfinite+ se genera una expeción.
 	def initialize der, der_in = true
 		if der == (Float::INFINITY) || der == -(Float::INFINITY)
 			raise "Los argumentos pasados no son los de un LeftInfinite"
@@ -362,6 +419,9 @@ class LeftInfinite < Interval
 		end
 	end
 
+	##
+	# Método que retorna el intervalo resultante de intersectar con +other+.
+	# Se implementa con doble despacho.
 	def intersection other
 		if not(self.intersects?(other))
 			Empty.instance
@@ -370,6 +430,8 @@ class LeftInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el doble despacho de intersecciones con +RightInfinite+s.
 	def intersection_rightInfinite rinf
 		if self.intersects? rinf
 			d = self.der
@@ -383,6 +445,8 @@ class LeftInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el doble despacho de intersecciones con +LeftInfinite+s.
 	def intersection_leftInfinite linf
 		if self.der < linf.der
 			d = self.der
@@ -397,6 +461,9 @@ class LeftInfinite < Interval
 		LeftInfinite.new(d,din)
 	end
 
+	##
+	# Método que retorna el intervalo resultante, de ser así posible, de la 
+	# unión con +other+. Si no es posible se arroja una exepción.
 	def union other
 		if self.unites? other
 			other.union_leftInfinite self
@@ -405,6 +472,9 @@ class LeftInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con literales.
+	# Se asume que +lit+ siempre es un +Literal+
 	def union_literal lit
 		if self.unites? lit
 			#Porque es lo mismo a copiar union_leftInfinite de Literal
@@ -414,6 +484,8 @@ class LeftInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +RightInfinite+s.
 	def union_rightInfinite rinf
 		if self.unites? rinf
 			AllReals.instance
@@ -422,6 +494,8 @@ class LeftInfinite < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +LeftInfinite+s.
 	def union_leftInfinite linf
 		if self.der > linf.der
 			d = self.der
@@ -441,8 +515,14 @@ class LeftInfinite < Interval
 	end
 end
 
+##
+# Case que reprsenta el intervalo de todos los números Reales.
 class AllReals < Interval
 	include Singleton
+	##
+	# Se implantó con el mixin +Singleton+ para aprovechar el patrón singletón.
+	# Esdecir, sólo hay una instancia en el progama. Por eso para _accederle_ 
+	# debe hacerse de la forma +AllReals.instance+.
 	def initialize
 		@izq = -(Float::INFINITY)
 		@der = (Float::INFINITY)
@@ -450,18 +530,28 @@ class AllReals < Interval
 		@der_in = false
 	end
 
+	##
+	# Método de intersección con todos los reales. Notar que el realizar esto es
+	# lo mismo a +other+
 	def intersection other
 		other
 	end
 	
+	##
+	# Método necesario para el doble despacho de intersecciones con +RightInfinite+s.
 	def intersection_rightInfinite rinf
 		rinf
 	end
 
+	##
+	# Método necesario para el doble despacho de intersecciones con +LeftInfinite+s.
 	def intersection_leftInfinite linf
 		linf
 	end
 
+	##
+	# Método que retorna de ser posible el intervalo resultante de unir con +other+.
+	# Notar que eso es lo mismo a devolver todos los reales en este caso.
 	def union other
 		if other == Empty.instance
 			raise "No se puede unir con el intervalo vacío"
@@ -470,48 +560,79 @@ class AllReals < Interval
 		end
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con literales.
+	# Se asume que +lit+ siempre es un +Literal+
 	def union_literal lit
 		self
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +RightInfinite+s.
 	def union_rightInfinite rinf
 		self
 	end
 
+	##
+	# Método necesario para el despacho doble de la unión con +LeftInfinite+s.
 	def union_leftInfinite linf
 		self
 	end
 end
 
+##
+# Clase que representa el intervalo vacío
 class Empty < Interval
 	include Singleton
+	##
+	# Se implantó con el mixin +Singleton+ para aprovechar el patrón singletón.
+	# Esdecir, sólo hay una instancia en el progama. Por eso para _accederle_ 
+	# debe hacerse de la forma +Empty.instance+.
+	#
+	# Esta clase no tiene ninguno de los métodos de despacho doble pues no los
+	# necesita. El predicado +intersects?+ se encarga de que no haga falta. Así
+	# la responsabilidad del programador por no llamar a los metodos de dobledespacho
+	# con argumentos que inválidos.
 	def initialize
 	end
 
+	##
+	# Método que retorna el resultado de intersectar con +other+. Notar que eso
+	# Siempre da vacío.
 	def intersection other
 		self
 	end
 
+	##
+	# Método que *no* retorna \*wink wink\* la unión con el intervalo vacío
 	def union other
 		raise "No se puede unir el intervalo vacío"
 	end
 end
 
+##
+# Método que recibe un +Array+ de Strings de la forma\:
+# 	[ _variable_, _operador-comparación_, _numero_ ]
+# y devuelve el intervalo asociado a esa expresión.
 def obtener_intervalo expresion
 	operador = 1
 	numero = 2
 	if expresion[operador] == "<"
 		n = expresion[numero].to_f
 		LeftInfinite.new(n,false)
+
 	elsif expresion[operador] == ">"
 		n = expresion[numero].to_f
 		RightInfinite.new(n,false)
+	
 	elsif expresion[operador] == "<="
 		n = expresion[numero].to_f
 		LeftInfinite.new(n,true)
+	
 	elsif expresion[operador] == ">="
 		n = expresion[numero].to_f
 		RightInfinite.new(n,true)
+	
 	elsif expresion [operador] == "=="
 		n = expresion[numero].to_f
 		Literal.new(n,n)
@@ -520,6 +641,8 @@ def obtener_intervalo expresion
 	end		
 end
 
+##
+# Procedimiento que muestra en pantalla el +par+ variable-intervalo
 def mostrar par
 	if par[1].izq == par[1].der && par[1]!=Empty.instance
 		puts "#{par[0]} is excatly #{par[1].der}"
@@ -528,12 +651,17 @@ def mostrar par
 	end
 end
 
+##
+# Procedimiento principal de la calculadora
+# *Notar* que las expresiones del archivo de tipo:
+# 	_variable_ _operador-comparación_ _numero_
+# La variable, operador de comparación y el número *deben* estar separadas por espacio.
 def main
 	if ARGV.length !=1
 		puts "Error, número de argumentos invalido"
 	else
 		f = File.open(ARGV[0],"r")
-		variables = Hash.new(AllReals.instance) #Ojo que puede que no sea bueno el default
+		variables = Hash.new(AllReals.instance) #Tabla de Símbolos
 		
 		#A cada linea hacerle split por '|' eso las separa las operaciones con la precedencia correcta.
 		#Luego a cada una de esas separarlas por '&' y optener y aplicar las expresiones
@@ -541,22 +669,25 @@ def main
 		variable = 0
 		while line = f.gets #Procesamiento de archivo
 			ortemp = Hash.new(AllReals.instance)
-			ors_op = line.split(/[\s]*\|[\s]*/)#Estar pendiente por si la estrella de klein no es
+			ors_op = line.split(/[\s]*\|[\s]*/)#Separamos los or. Estar pendiente por si la estrella de klein no es
 			for orop in ors_op
 				andtemp = Hash.new(AllReals.instance) #diccionario auxiliar de los and
-				ands_op = orop.split(/[\s]*&[\s]*/)
+				ands_op = orop.split(/[\s]*&[\s]*/)#Separamos los and
 				
 				for andop in ands_op
 					expresion = andop.split(/[\s]+/)#Asumimos que tiene los espacios, sino hay que recorrer manual
 					if andtemp.has_key? expresion[variable]
 						interv = obtener_intervalo(expresion)
+						#Obtenemos intervalo y le hacemos el and respectivo						
 						andtemp[expresion[variable]] = andtemp[expresion[variable]].intersection(interv)
 					else
 						andtemp[expresion[variable]] = obtener_intervalo(expresion)
 					end
 				end
+				#Una vez terminado el término de conjunción procedemos a operar la disyuncion
 				ortemp = ortemp.merge(andtemp){|key,orval,andval| orval.union andval}
 			end
+			#Luego de procesada la línea, se hace el or con el resto.
 			variables = variables.merge(ortemp){|key,varval,orval| varval.union orval}
 		end
 		f.close
