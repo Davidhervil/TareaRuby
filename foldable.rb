@@ -75,7 +75,7 @@ class Rose
         suma/total
     end
 end
-
+'''
 def main
     a = Rose.new(1, [Rose.new(2, [ Rose.new(4), Rose.new(5) ]),Rose.new(3, [ Rose.new(6) ])])
     b = [1,2,3,4,5,6]
@@ -124,3 +124,4 @@ def main
     puts " Arreglo busqueda false"
     return "Readixon"
 end
+'''
