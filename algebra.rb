@@ -2,17 +2,17 @@ require 'singleton'
 
 class Interval
 	attr_reader :izq, :der, :izq_in, :der_in
-	# Verificar si es mejor hacer las inclusiones con un numero
-	# y sumarselo siempre CHECKED-RECHECKED
+
 	def initialize izq, der, izq_in=true, der_in=true#Meter condiciones extra
+		puts "Advertencia, está instanciando un Interval. La correctitud de sus parametros depende de USTED."
 		@izq = izq
 		@der = der
 		@izq_in = izq_in
 		@der_in = der_in
-		#OJO ARREGLAR
+		#Hace falta verificar si estos estan correctos ?
 	end
 
-	def to_s #Estar Pendiente de quitar los Infinity del print
+	def to_s
 		if self.empty?
 			"empty"
 		else
@@ -259,14 +259,10 @@ class Literal < Interval
 			raise "Los intervalos no se intersectan ni cumplen con (a, b) U [b, c] = (a, c]"
 		end 
 	end
-
-	def union_allReals allr #por ahora no
-		AllReals.instance
-	end
 end
 
 class RightInfinite < Interval
-	def initialize izq, izq_in = true #Meter condiciones extra
+	def initialize izq, izq_in = true
 		if izq == (Float::INFINITY) || izq == -(Float::INFINITY)
 			raise "Los argumentos utilizados no son los de un RightInfinite"
 		else
@@ -346,7 +342,7 @@ class RightInfinite < Interval
 		RightInfinite.new(l,lin)
 	end
 
-	def union_leftInfinite linf #por ahora no
+	def union_leftInfinite linf
 		if self.unites? linf
 			AllReals.instance
 		else
@@ -356,7 +352,7 @@ class RightInfinite < Interval
 end
 
 class LeftInfinite < Interval
-	def initialize der, der_in = true#Meter condiciones extra
+	def initialize der, der_in = true
 		if der == (Float::INFINITY) || der == -(Float::INFINITY)
 			raise "Los argumentos pasados no son los de un LeftInfinite"
 		else
@@ -447,7 +443,7 @@ end
 
 class AllReals < Interval
 	include Singleton
-	def initialize#Meter condiciones extra
+	def initialize
 		@izq = -(Float::INFINITY)
 		@der = (Float::INFINITY)
 		@izq_in = false
@@ -488,7 +484,7 @@ end
 
 class Empty < Interval
 	include Singleton
-	def initialize#Meter condiciones extra
+	def initialize
 	end
 
 	def intersection other
