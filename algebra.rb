@@ -265,10 +265,14 @@ end
 
 class RightInfinite < Interval
 	def initialize izq, izq_in = true #Meter condiciones extra
-		@izq = izq
-		@der = Float::INFINITY
-		@izq_in = izq_in
-		@der_in = false
+		if izq == Float::INFINITY || izq == -(Float::INFINITY)
+			raise "Los argumentos utilizados no son los de un RightInfinite"
+		else
+			@izq = izq
+			@der = Float::INFINITY
+			@izq_in = izq_in
+			@der_in = false
+		end
 	end
 
 	def intersection other
@@ -351,10 +355,14 @@ end
 
 class LeftInfinite < Interval
 	def initialize der, der_in = true#Meter condiciones extra
-		@der = der
-		@izq = -(Float::INFINITY)
-		@izq_in = false
-		@der_in = der_in
+		if der == Float::INFINITY || der == -(Float::INFINITY)
+			raise "Los argumentos pasados no son los de un LeftInfinite"
+		else
+			@der = der
+			@izq = -(Float::INFINITY)
+			@izq_in = false
+			@der_in = der_in
+		end
 	end
 
 	def intersection other
